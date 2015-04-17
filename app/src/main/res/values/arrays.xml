@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_units_options">
+        <item>@string/pref_genre_label_drama</item>
+        <item>@string/pref_genre_label_mystery</item>
+        <item>@string/pref_genre_label_scifi</item>
+        <item>@string/pref_genre_label_thriller</item>
+    </string-array>
+
+    <string-array name="pref_units_values">
+        <item>@string/pref_genre_drama</item>
+        <item>@string/pref_genre_mystery</item>
+        <item>@string/pref_genre_scifi</item>
+        <item>@string/pref_genre_thriller</item>
+    </string-array>
+</resources>

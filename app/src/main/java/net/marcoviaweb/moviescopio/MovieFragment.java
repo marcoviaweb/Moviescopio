@@ -1,8 +1,11 @@
 package net.marcoviaweb.moviescopio;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -25,8 +29,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by mavendano on 16/04/2015.
@@ -53,8 +55,8 @@ public class MovieFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            FetchMovieTask movieTask = new FetchMovieTask();
-            movieTask.execute("878");
+            updateMovie();
+
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -65,26 +67,44 @@ public class MovieFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        String[] moviesArray = {
-                "Avengers - lanzamiento - votos",
-                "Stars - lanzamiento - votos",
-                "Thor - lanzamiento - votos",
-                "Hulk - lanzamiento - votos",
-        };
-
-        List<String> moviesList = new ArrayList<String>(Arrays.asList(moviesArray));
-
         mMoviesAdapter = new ArrayAdapter<String>(
                 getActivity(),
                 R.layout.list_item_movies,
                 R.id.list_item_movies_textview,
-                moviesList
+                new ArrayList<String>()
         );
 
         ListView listView = (ListView) rootView.findViewById(R.id.listview_movies);
         listView.setAdapter(mMoviesAdapter);
 
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                String movie = mMoviesAdapter.getItem(position);
+                Intent intent = new Intent(getActivity(), DetailActivity.class).putExtra(Intent.EXTRA_TEXT, movie);
+                startActivity(intent);
+            }
+        });
+
         return rootView;
+    }
+
+    private void updateMovie() {
+        FetchMovieTask movieTask = new FetchMovieTask();
+
+
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String genre = sharedPrefs.getString(
+                getString(R.string.pref_genre_key),
+                getString(R.string.pref_genre_scifi));
+
+        movieTask.execute(genre);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateMovie();
     }
 
     public class FetchMovieTask extends AsyncTask<String, Void, String[]> {
@@ -113,6 +133,7 @@ public class MovieFragment extends Fragment {
             // Cheating to convert this to UTC time, which is what we want anyhow
             // Cheating to convert this to UTC time, which is what we want anyhow
             String[] resultStrs = new String[20];
+
             for (int i = 0; i < movieArray.length(); i++) {
                 // For now, using the format "Day, description, hi/low"
                 String dateRelease;
