@@ -21,7 +21,7 @@ import java.util.Set;
     in our solution to use these as-given.
  */
 public class TestUtilities extends AndroidTestCase {
-    static final String TEST_LOCATION = "99705";
+    static final long TEST_GENRE = 878;
 
     static void validateCursor(String error, Cursor valueCursor, ContentValues expectedValues) {
         assertTrue("Empty cursor returned. " + error, valueCursor.moveToFirst());
@@ -45,21 +45,14 @@ public class TestUtilities extends AndroidTestCase {
     /*
         Students: Use this to create some default weather values for your database tests.
      */
-//    static ContentValues createWeatherValues(long locationRowId) {
-//        ContentValues movieValues = new ContentValues();
-//        movieValues.put(MovieContract.MovieEntry.COLUMN_IDENTIFIER, "999");
-//        movieValues.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, "/ajsfkljaslkdf.jpg");
-//        movieValues.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, "2014-05-01");
-//        movieValues.put(MovieContract.MovieEntry.COLUMN_TITLE, "Los vengadores");
-//        movieValues.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, 7.6);
-//
-//        return movieValues;
-//    }
+    static ContentValues createGenreMovieValues(long movieRowId) {
+        ContentValues genreMovieValues = new ContentValues();
+        genreMovieValues.put(MovieContract.GenreMovieEntry.COLUMN_MOVIE_KEY, movieRowId);
+        genreMovieValues.put(MovieContract.GenreMovieEntry.COLUMN_GENRE_KEY, TEST_GENRE);
 
-    /*
-        Students: You can uncomment this helper function once you have finished creating the
-        LocationEntry part of the WeatherContract.
-     */
+        return genreMovieValues;
+    }
+
     static ContentValues createAvengersMovieValues() {
         // Create a new map of values, where column names are the keys
         ContentValues movieValues = new ContentValues();
