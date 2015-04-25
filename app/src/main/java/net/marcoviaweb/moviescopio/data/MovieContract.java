@@ -14,7 +14,7 @@ public class MovieContract {
     public static final String CONTENT_AUTHORITY = "net.marcoviaweb.moviescopio";
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
-    public static final String PATH_GENRE_MOVIE = "genreMovie";
+    public static final String PATH_MOVIE_GENRE = "genreMovie";
     public static final String PATH_MOVIE = "movie";
 
     /* Inner class that defines the table contents of the movie table */
@@ -51,10 +51,10 @@ public class MovieContract {
     /* Inner class that defines the table contents of the typeMovie table */
     public static final class GenreMovieEntry implements BaseColumns {
 
-        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_GENRE_MOVIE).build();
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE_GENRE).build();
 
-        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_GENRE_MOVIE;
-        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_GENRE_MOVIE;
+        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIE_GENRE;
+        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIE_GENRE;
 
         public static final String TABLE_NAME = "genreMovie";
 

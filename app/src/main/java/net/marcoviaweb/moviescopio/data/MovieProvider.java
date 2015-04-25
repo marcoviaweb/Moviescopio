@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.util.Log;
 
 public class MovieProvider extends ContentProvider {
 
@@ -16,7 +17,9 @@ public class MovieProvider extends ContentProvider {
     private MovieDbHelper mOpenHelper;
 
     static final int MOVIE = 100;
-    static final int MOVIE_BY_GENRE = 101;
+    static final int MOVIE_GENRE = 101;
+    static final int MOVIE_WITH_ID = 102;
+    static final int MOVIE_WITH_GENRE = 103;
 
     private static final SQLiteQueryBuilder sWeatherByLocationSettingQueryBuilder;
 
@@ -87,8 +90,10 @@ public class MovieProvider extends ContentProvider {
         final String authority = MovieContract.CONTENT_AUTHORITY;
 
         // For each type of URI you want to add, create a corresponding code.
-        matcher.addURI(authority, MovieContract.PATH_MOVIE + "/*", MOVIE);
-        matcher.addURI(authority, MovieContract.PATH_GENRE_MOVIE + "/*", MOVIE_BY_GENRE);
+        matcher.addURI(authority, MovieContract.PATH_MOVIE, MOVIE);
+        matcher.addURI(authority, MovieContract.PATH_MOVIE_GENRE, MOVIE_GENRE);
+        matcher.addURI(authority, MovieContract.PATH_MOVIE + "/*", MOVIE_WITH_ID);
+        matcher.addURI(authority, MovieContract.PATH_MOVIE_GENRE + "/*", MOVIE_WITH_GENRE);
 
         return matcher;
     }
@@ -110,18 +115,17 @@ public class MovieProvider extends ContentProvider {
      */
     @Override
     public String getType(Uri uri) {
-
-        // Use the Uri Matcher to determine what kind of URI this is.
         final int match = sUriMatcher.match(uri);
 
         switch (match) {
-            // Student: Uncomment and fill out these two cases
-//            case WEATHER_WITH_LOCATION_AND_DATE:
-//            case WEATHER_WITH_LOCATION:
             case MOVIE:
                 return MovieContract.MovieEntry.CONTENT_TYPE;
-            case MOVIE_BY_GENRE:
+            case MOVIE_GENRE:
+                return MovieContract.GenreMovieEntry.CONTENT_TYPE;
+            case MOVIE_WITH_ID:
                 return MovieContract.MovieEntry.CONTENT_TYPE;
+            case MOVIE_WITH_GENRE:
+                return MovieContract.GenreMovieEntry.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -134,15 +138,38 @@ public class MovieProvider extends ContentProvider {
         // and query the database accordingly.
         Cursor retCursor;
         switch (sUriMatcher.match(uri)) {
-            // "weather/*/*"
-            case MOVIE:
-            {
+            case MOVIE_WITH_ID: {
                 retCursor = getMovieById(uri, projection, sortOrder);
                 break;
             }
-            // "weather/*"
-            case MOVIE_BY_GENRE: {
+            case MOVIE_WITH_GENRE: {
                 retCursor = getMovieByGenreSetting(uri, projection, sortOrder);
+                break;
+            }
+            case MOVIE:
+            {
+                Log.v("++++++++", "Ingreso aca ");
+                retCursor = mOpenHelper.getReadableDatabase().query(
+                        MovieContract.MovieEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
+            }
+            case MOVIE_GENRE: {
+                retCursor = mOpenHelper.getReadableDatabase().query(
+                        MovieContract.GenreMovieEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
                 break;
             }
 
@@ -171,6 +198,14 @@ public class MovieProvider extends ContentProvider {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
             }
+            case MOVIE_GENRE: {
+                long _id = db.insert(MovieContract.GenreMovieEntry.TABLE_NAME, null, values);
+                if ( _id > 0 )
+                    returnUri = MovieContract.GenreMovieEntry.buildGenreMovieUri(_id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -180,39 +215,84 @@ public class MovieProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        // Student: Start by getting a writable database
-
-        // Student: Use the uriMatcher to match the WEATHER and LOCATION URI's we are going to
-        // handle.  If it doesn't match these, throw an UnsupportedOperationException.
-
-        // Student: A null value deletes all rows.  In my implementation of this, I only notified
-        // the uri listeners (using the content resolver) if the rowsDeleted != 0 or the selection
-        // is null.
-        // Oh, and you should notify the listeners here.
-
-        // Student: return the actual rows deleted
-        return 0;
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        int rowsDeleted;
+        // this makes delete all rows return the number of rows deleted
+        if ( null == selection ) selection = "1";
+        switch (match) {
+            case MOVIE_GENRE:
+                rowsDeleted = db.delete(
+                        MovieContract.GenreMovieEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            case MOVIE:
+                rowsDeleted = db.delete(
+                        MovieContract.MovieEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        // Because a null deletes all rows
+        if (rowsDeleted != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return rowsDeleted;
     }
 
     @Override
     public int update(
             Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        // Student: This is a lot like the delete function.  We return the number of rows impacted
-        // by the update.
-        return 0;
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        int rowsUpdated;
+
+        switch (match) {
+            case MOVIE_GENRE:
+                rowsUpdated = db.update(MovieContract.GenreMovieEntry.TABLE_NAME, values, selection,
+                        selectionArgs);
+                break;
+            case MOVIE:
+                rowsUpdated = db.update(MovieContract.MovieEntry.TABLE_NAME, values, selection,
+                        selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        if (rowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return rowsUpdated;
     }
 
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
+        int returnCount;
+
         switch (match) {
             case MOVIE:
                 db.beginTransaction();
-                int returnCount = 0;
+                returnCount = 0;
                 try {
                     for (ContentValues value : values) {
                         long _id = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, value);
+                        if (_id != -1) {
+                            returnCount++;
+                        }
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+                getContext().getContentResolver().notifyChange(uri, null);
+                return returnCount;
+            case MOVIE_GENRE:
+                db.beginTransaction();
+                returnCount = 0;
+                try {
+                    for (ContentValues value : values) {
+                        long _id = db.insert(MovieContract.GenreMovieEntry.TABLE_NAME, null, value);
                         if (_id != -1) {
                             returnCount++;
                         }

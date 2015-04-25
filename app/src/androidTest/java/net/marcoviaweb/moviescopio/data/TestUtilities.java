@@ -21,7 +21,8 @@ import java.util.Set;
     in our solution to use these as-given.
  */
 public class TestUtilities extends AndroidTestCase {
-    static final long TEST_GENRE = 878;
+    static final String TEST_MOVIE = "999";
+    static final String TEST_GENRE = "878";
 
     static void validateCursor(String error, Cursor valueCursor, ContentValues expectedValues) {
         assertTrue("Empty cursor returned. " + error, valueCursor.moveToFirst());
