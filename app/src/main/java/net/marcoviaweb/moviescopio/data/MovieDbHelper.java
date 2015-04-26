@@ -12,7 +12,7 @@ import net.marcoviaweb.moviescopio.data.MovieContract.MovieEntry;
 public class MovieDbHelper extends SQLiteOpenHelper {
 
     // If you change the database schema, you must increment the database version.
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     static final String DATABASE_NAME = "movie.db";
 
@@ -37,12 +37,12 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 MovieContract.GenreMovieEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 MovieContract.GenreMovieEntry.COLUMN_MOVIE_KEY + " INTEGER NOT NULL, " +
                 MovieContract.GenreMovieEntry.COLUMN_GENRE_KEY + " INTEGER NOT NULL, " +
-
+                /*
                 // Set up the movie column as a foreign key to movie table.
                 " FOREIGN KEY (" + MovieContract.GenreMovieEntry.COLUMN_MOVIE_KEY + ") REFERENCES " +
                 MovieEntry.TABLE_NAME + " (" + MovieEntry._ID + "), " +
-
-                " UNIQUE (" + MovieContract.GenreMovieEntry.COLUMN_MOVIE_KEY + ", " + MovieContract.GenreMovieEntry.COLUMN_GENRE_KEY + "));";
+                */
+                " UNIQUE (" + MovieContract.GenreMovieEntry.COLUMN_MOVIE_KEY + ", " + MovieContract.GenreMovieEntry.COLUMN_GENRE_KEY + ") ON CONFLICT REPLACE);";
 
 
         sqLiteDatabase.execSQL(SQL_CREATE_MOVIE_TABLE);

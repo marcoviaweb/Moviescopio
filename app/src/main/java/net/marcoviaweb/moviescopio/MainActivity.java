@@ -9,13 +9,19 @@ import android.view.MenuItem;
 
 public class MainActivity extends ActionBarActivity {
 
+    private final String LOG_TAG = MainActivity.class.getSimpleName();
+    private final String MOVIEFRAGMENT_TAG = "MFTAG";
+
+    private String mGenre;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mGenre = Utility.getPreferredGenre(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new MovieFragment())
+                    .add(R.id.container, new MovieFragment(), MOVIEFRAGMENT_TAG)
                     .commit();
         }
     }
@@ -44,4 +50,16 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        String genre = Utility.getPreferredGenre(this);
+        if (genre != null && !genre.equals(mGenre)) {
+            MovieFragment ff = (MovieFragment)getSupportFragmentManager().findFragmentByTag(MOVIEFRAGMENT_TAG);
+            if ( null != ff ) {
+                ff.onGenreChanged();
+            }
+            mGenre = genre;
+        }
+    }
 }

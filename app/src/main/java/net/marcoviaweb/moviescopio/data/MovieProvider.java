@@ -8,7 +8,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.util.Log;
 
 public class MovieProvider extends ContentProvider {
 
@@ -34,13 +33,13 @@ public class MovieProvider extends ContentProvider {
                         " ON " + MovieContract.GenreMovieEntry.TABLE_NAME +
                         "." + MovieContract.GenreMovieEntry.COLUMN_MOVIE_KEY +
                         " = " + MovieContract.MovieEntry.TABLE_NAME +
-                        "." + MovieContract.MovieEntry._ID);
+                        "." + MovieContract.MovieEntry.COLUMN_IDENTIFIER);
     }
 
     //genreMovie.genre_id = ?
     private static final String sGenreSettingSelection =
             MovieContract.GenreMovieEntry.TABLE_NAME+
-                    "." + MovieContract.GenreMovieEntry.COLUMN_GENRE_KEY + " = ? ";
+                    "." + MovieContract.GenreMovieEntry.COLUMN_GENRE_KEY + " LIKE ? "; //TODO LIKE
 
     //movie.identifier = ?
     private static final String sMovieByIdSelection =
@@ -139,16 +138,18 @@ public class MovieProvider extends ContentProvider {
         Cursor retCursor;
         switch (sUriMatcher.match(uri)) {
             case MOVIE_WITH_ID: {
+                //Log.d("** Donde ingreso **: ", "MOVIE_WITH_ID" );
                 retCursor = getMovieById(uri, projection, sortOrder);
                 break;
             }
             case MOVIE_WITH_GENRE: {
+                //Log.d("** Donde ingreso **: ", "MOVIE_WITH_GENRE" );
                 retCursor = getMovieByGenreSetting(uri, projection, sortOrder);
                 break;
             }
             case MOVIE:
             {
-                Log.v("++++++++", "Ingreso aca ");
+                //Log.d("** Donde ingreso **: ", "MOVIE" );
                 retCursor = mOpenHelper.getReadableDatabase().query(
                         MovieContract.MovieEntry.TABLE_NAME,
                         projection,
@@ -161,6 +162,7 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             case MOVIE_GENRE: {
+                //Log.d("** Donde ingreso **: ", "MOVIE_GENRE" );
                 retCursor = mOpenHelper.getReadableDatabase().query(
                         MovieContract.GenreMovieEntry.TABLE_NAME,
                         projection,

@@ -8,7 +8,6 @@ import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ArrayAdapter;
 
 import net.marcoviaweb.moviescopio.data.MovieContract;
 import net.marcoviaweb.moviescopio.data.MovieContract.GenreMovieEntry;
@@ -18,66 +17,25 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Vector;
 
 public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
     private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
 
-    private ArrayAdapter<String> mForecastAdapter;
     private final Context mContext;
 
-    public FetchWeatherTask(Context context, ArrayAdapter<String> forecastAdapter) {
+    public FetchWeatherTask(Context context) {
         mContext = context;
-        mForecastAdapter = forecastAdapter;
     }
 
     private boolean DEBUG = true;
-
-    /* The date/time conversion code is going to be moved outside the asynctask later,
-     * so for convenience we're breaking it out into its own method now.
-     */
-    private String getReadableDateString(long time){
-        // Because the API returns a unix timestamp (measured in seconds),
-        // it must be converted to milliseconds in order to be converted to valid date.
-        Date date = new Date(time);
-        SimpleDateFormat format = new SimpleDateFormat("E, MMM d");
-        return format.format(date).toString();
-    }
-
-    /**
-     * Prepare the weather high/lows for presentation.
-     */
-    /*
-    private String formatHighLows(double high, double low) {
-        // Data is fetched in Celsius by default.
-        // If user prefers to see in Fahrenheit, convert the values here.
-        // We do this rather than fetching in Fahrenheit so that the user can
-        // change this option without us having to re-fetch the data once
-        // we start storing the values in a database.
-        SharedPreferences sharedPrefs =
-                PreferenceManager.getDefaultSharedPreferences(mContext);
-        String unitType = sharedPrefs.getString(
-                mContext.getString(R.string.pref_units_key),
-                mContext.getString(R.string.pref_units_metric));
-
-        if (unitType.equals(mContext.getString(R.string.pref_units_imperial))) {
-            high = (high * 1.8) + 32;
-            low = (low * 1.8) + 32;
-        } else if (!unitType.equals(mContext.getString(R.string.pref_units_metric))) {
-            Log.d(LOG_TAG, "Unit type not found: " + unitType);
-        }
-
-        // For presentation, assume the user doesn't care about tenths of a degree.
-        long roundedHigh = Math.round(high);
-        long roundedLow = Math.round(low);
-
-        String highLowStr = roundedHigh + "/" + roundedLow;
-        return highLowStr;
-    }
-    */
 
     /**
      * Helper method to handle insertion of a new location in the weather database.
@@ -87,7 +45,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
      * @param releaseDate the latitude of the city
      * @param title the longitude of the city
      * @param voteAverage the longitude of the city
-     * @return the row ID of the added location.
+     * @return the row ID of the added movie.
      */
     long addMovie(String identifier, String posterPath, String releaseDate, String title, double voteAverage) {
         long movieId;
@@ -133,6 +91,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         the UX expects so that we can continue to test the application even once we begin using
         the database.
      */
+
     String[] convertContentValuesToUXFormat(Vector<ContentValues> cvv) {
         // return strings to keep UI functional for now
         String[] resultStrs = new String[cvv.size()];
@@ -218,35 +177,32 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
                 ContentValues[] cvMovieArray = new ContentValues[cVMovieVector.size()];
                 cVMovieVector.toArray(cvMovieArray);
                 inserted = mContext.getContentResolver().bulkInsert(MovieEntry.CONTENT_URI, cvMovieArray);
+                //Log.d("cant Movie: ", Integer.toString(inserted) );
                 //MoviesByGenre
                 ContentValues[] cvMovieByGenreArray = new ContentValues[cVMovieByGenreVector.size()];
                 cVMovieByGenreVector.toArray(cvMovieByGenreArray);
                 inserted = mContext.getContentResolver().bulkInsert(GenreMovieEntry.CONTENT_URI, cvMovieByGenreArray);
+                //Log.d("cant Genre Movie: ", Integer.toString(inserted) );
             }
 
 
-            // Sort order:  Ascending, by date.
-            String sortOrder = MovieEntry.COLUMN_RELEASE_DATE + " DESC";
+            /**/
             Uri movieByGenreUri = GenreMovieEntry.buildMovieByGenre(genreSetting);
+            Cursor cur = mContext.getContentResolver().query(movieByGenreUri, null, null, null, null);
+            //Log.d("** cantidad cursor **: ", Integer.toString(cur.getCount()) );
 
-            // Students: Uncomment the next lines to display what what you stored in the bulkInsert
-
-            Cursor cur = mContext.getContentResolver().query(movieByGenreUri,
-                    null, null, null, sortOrder);
-
-            cVMovieVector = new Vector<ContentValues>(cur.getCount());
+            cVMovieByGenreVector = new Vector<ContentValues>(cur.getCount());
             if ( cur.moveToFirst() ) {
                 do {
                     ContentValues cv = new ContentValues();
                     DatabaseUtils.cursorRowToContentValues(cur, cv);
-                    cVMovieVector.add(cv);
+                    //Log.d(LOG_TAG, cv.getAsString(MovieEntry.COLUMN_IDENTIFIER));
+                    cVMovieByGenreVector.add(cv);
                 } while (cur.moveToNext());
             }
 
-
-            Log.d(LOG_TAG, "FetchWeatherTask Movie Complete. " + cVMovieVector.size() + " Inserted");
             Log.d(LOG_TAG, "FetchWeatherTask Genre movie Complete. " + cVMovieByGenreVector.size() + " Inserted");
-
+            /**/
             String[] resultStrs = convertContentValuesToUXFormat(cVMovieVector);
             return resultStrs;
 
@@ -257,17 +213,14 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         return null;
     }
 
-
-
     @Override
     protected String[] doInBackground(String... params) {
-         /*
 
         // If there's no zip code, there's nothing to look up.  Verify size of params.
         if (params.length == 0) {
             return null;
         }
-        String locationQuery = params[0];
+        String movieQuery = params[0];
 
         // These two need to be declared outside the try/catch
         // so that they can be closed in the finally block.
@@ -277,26 +230,25 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         // Will contain the raw JSON response as a string.
         String forecastJsonStr = null;
 
-        String format = "json";
-        String units = "metric";
-        int numDays = 14;
+        String apy_key = "54b406237a31ab795b7850ff7ddc2494";
+        String sort_by = "popularity.desc";
+        int page = 1;
 
         try {
             // Construct the URL for the OpenWeatherMap query
             // Possible parameters are avaiable at OWM's forecast API page, at
             // http://openweathermap.org/API#forecast
-            final String FORECAST_BASE_URL =
-                    "http://api.openweathermap.org/data/2.5/forecast/daily?";
-            final String QUERY_PARAM = "q";
-            final String FORMAT_PARAM = "mode";
-            final String UNITS_PARAM = "units";
-            final String DAYS_PARAM = "cnt";
+            final String FORECAST_BASE_URL = "http://api.themoviedb.org/3/discover/movie?";
+            final String QUERY_API_KEY = "api_key";
+            final String QUERY_ORDEN = "sort_by";
+            final String QUERY_PAGINA = "page";
+            final String QUERY_GENERO = "with_genres";
 
             Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
-                    .appendQueryParameter(QUERY_PARAM, params[0])
-                    .appendQueryParameter(FORMAT_PARAM, format)
-                    .appendQueryParameter(UNITS_PARAM, units)
-                    .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
+                    .appendQueryParameter(QUERY_API_KEY, apy_key)
+                    .appendQueryParameter(QUERY_ORDEN, sort_by)
+                    .appendQueryParameter(QUERY_PAGINA, Integer.toString(page))
+                    .appendQueryParameter(QUERY_GENERO, params[0])
                     .build();
 
             URL url = new URL(builtUri.toString());
@@ -328,11 +280,14 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
                 return null;
             }
             forecastJsonStr = buffer.toString();
+            getMovieDataFromJson(forecastJsonStr, movieQuery);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error ", e);
-            // If the code didn't successfully get the weather data, there's no point in attemping
+            // If the code didn't successfully get the weather data, there's no point in attempting
             // to parse it.
-            return null;
+        } catch (JSONException e) {
+            Log.e(LOG_TAG, e.getMessage(), e);
+            e.printStackTrace();
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
@@ -345,28 +300,6 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
                 }
             }
         }
-
-        try {
-            return getMovieDataFromJson(forecastJsonStr, locationQuery);
-        } catch (JSONException e) {
-            Log.e(LOG_TAG, e.getMessage(), e);
-            e.printStackTrace();
-        }
-        */
-        // This will only happen if there was an error getting or parsing the forecast.
         return null;
-
-    }
-
-
-    @Override
-    protected void onPostExecute(String[] result) {
-        if (result != null && mForecastAdapter != null) {
-            mForecastAdapter.clear();
-            for(String dayForecastStr : result) {
-                mForecastAdapter.add(dayForecastStr);
-            }
-            // New data is back from the server.  Hooray!
-        }
     }
 }

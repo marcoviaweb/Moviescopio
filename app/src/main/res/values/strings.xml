@@ -18,6 +18,7 @@
     <string name="pref_genre_label_thriller">Suspenso</string>
 
     <string name="pref_genre_key" translatable="false">genre</string>
+    <string name="pref_genre_default" translatable="false">878</string>
 
     <string name="pref_genre_drama" translatable="false">18</string>
     <string name="pref_genre_mystery" translatable="false">9648</string>
