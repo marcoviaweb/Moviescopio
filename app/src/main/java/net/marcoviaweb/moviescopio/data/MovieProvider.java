@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.util.Log;
 
 public class MovieProvider extends ContentProvider {
 
@@ -138,7 +139,7 @@ public class MovieProvider extends ContentProvider {
         Cursor retCursor;
         switch (sUriMatcher.match(uri)) {
             case MOVIE_WITH_ID: {
-                //Log.d("** Donde ingreso **: ", "MOVIE_WITH_ID" );
+                Log.d("**** Donde ingreso **: ", "MOVIE_WITH_ID");
                 retCursor = getMovieById(uri, projection, sortOrder);
                 break;
             }

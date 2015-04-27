@@ -6,7 +6,7 @@ import android.test.AndroidTestCase;
 
 import net.marcoviaweb.moviescopio.data.MovieContract;
 
-public class TestFetchWeatherTask extends AndroidTestCase{
+public class TestFetchMovieTask extends AndroidTestCase{
     static final String ADD_MOVIE_IDENTIFIER = "157336";
     static final String ADD_MOVIE_POSTER_PATH = "/fasljdfladsjf.jpg";
     static final String ADD_MOVIE_RELEASE_DATE = "02-02-2015";
@@ -25,7 +25,7 @@ public class TestFetchWeatherTask extends AndroidTestCase{
                 MovieContract.MovieEntry.COLUMN_IDENTIFIER + " = ?",
                 new String[]{ADD_MOVIE_IDENTIFIER});
 
-        FetchWeatherTask fwt = new FetchWeatherTask(getContext(), null);
+        FetchMovieTask fwt = new FetchMovieTask(getContext());
         long movieId = fwt.addMovie(ADD_MOVIE_IDENTIFIER, ADD_MOVIE_POSTER_PATH, ADD_MOVIE_RELEASE_DATE, ADD_MOVIE_TITLE, ADD_MOVIE_VOTE_AVERAGE);
 
         // does addMovie return a valid record ID?

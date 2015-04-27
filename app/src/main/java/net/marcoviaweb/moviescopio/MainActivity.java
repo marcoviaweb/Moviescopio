@@ -1,35 +1,45 @@
 package net.marcoviaweb.moviescopio;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements MovieFragment.Callback {
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
-    private final String MOVIEFRAGMENT_TAG = "MFTAG";
+    private static final String MOVIEFRAGMENT_TAG = "MFTAG";
 
+    private boolean mTwoPane;
     private String mGenre;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mGenre = Utility.getPreferredGenre(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new MovieFragment(), MOVIEFRAGMENT_TAG)
-                    .commit();
-        }
-    }
+        mGenre = Utility.getPreferredGenre(this);
 
+        setContentView(R.layout.activity_main);
+        if (findViewById(R.id.movie_detail_container) != null) {
+            mTwoPane = true;
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.movie_detail_container, new DetailFragment(), MOVIEFRAGMENT_TAG)
+                        .commit();
+            }
+        } else {
+            mTwoPane = false;
+        }
+
+        MovieFragment movieFragment =  ((MovieFragment)getSupportFragmentManager()
+                .findFragmentById(R.id.fragment_movie_list));
+        movieFragment.setUseTodayLayout(!mTwoPane);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -54,12 +64,36 @@ public class MainActivity extends ActionBarActivity {
     protected void onResume() {
         super.onResume();
         String genre = Utility.getPreferredGenre(this);
+
         if (genre != null && !genre.equals(mGenre)) {
-            MovieFragment ff = (MovieFragment)getSupportFragmentManager().findFragmentByTag(MOVIEFRAGMENT_TAG);
+            MovieFragment ff = (MovieFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_movie_list);
             if ( null != ff ) {
                 ff.onGenreChanged();
             }
+            DetailFragment df = (DetailFragment)getSupportFragmentManager().findFragmentByTag(MOVIEFRAGMENT_TAG);
+            if (null != df) {
+                df.onGenreChanged(genre);
+            }
             mGenre = genre;
+        }
+    }
+
+    @Override
+    public void onItemSelected(Uri contentUri) {
+        if (mTwoPane) {
+            Bundle args = new Bundle();
+            args.putParcelable(DetailFragment.DETAIL_URI, contentUri);
+
+            DetailFragment fragment = new DetailFragment();
+            fragment.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.movie_detail_container, fragment, MOVIEFRAGMENT_TAG)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, DetailActivity.class)
+                    .setData(contentUri);
+            startActivity(intent);
         }
     }
 }

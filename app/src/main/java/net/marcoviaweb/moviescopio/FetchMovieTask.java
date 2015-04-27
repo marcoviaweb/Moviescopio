@@ -25,13 +25,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Vector;
 
-public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
+public class FetchMovieTask extends AsyncTask<String, Void, Void> {
 
-    private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
+    private final String LOG_TAG = FetchMovieTask.class.getSimpleName();
 
     private final Context mContext;
 
-    public FetchWeatherTask(Context context) {
+    public FetchMovieTask(Context context) {
         mContext = context;
     }
 
@@ -75,7 +75,9 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             movieValues.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, voteAverage);
 
             // Finally, insert location data into the database.
-            Uri insertedUri = mContext.getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, movieValues);
+            Uri insertedUri = mContext.getContentResolver().insert(
+                    MovieContract.MovieEntry.CONTENT_URI, movieValues
+            );
 
             // The resulting URI contains the ID for the row.  Extract the locationId from the Uri.
             movieId = ContentUris.parseId(insertedUri);
@@ -86,26 +88,6 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         return movieId;
     }
 
-    /*
-        Students: This code will allow the FetchWeatherTask to continue to return the strings that
-        the UX expects so that we can continue to test the application even once we begin using
-        the database.
-     */
-
-    String[] convertContentValuesToUXFormat(Vector<ContentValues> cvv) {
-        // return strings to keep UI functional for now
-        String[] resultStrs = new String[cvv.size()];
-        for ( int i = 0; i < cvv.size(); i++ ) {
-            ContentValues movieValues = cvv.elementAt(i);
-
-            resultStrs[i] = movieValues.getAsString(MovieEntry.COLUMN_RELEASE_DATE) +
-                    " = " + movieValues.getAsString(MovieEntry.COLUMN_POSTER_PATH) +
-                    " = " + movieValues.getAsString(MovieEntry.COLUMN_TITLE) +
-                    " = " + movieValues.getAsString(MovieEntry.COLUMN_VOTE_AVERAGE);
-        }
-        return resultStrs;
-    }
-
     /**
      * Take the String representing the complete forecast in JSON Format and
      * pull out the data we need to construct the Strings needed for the wireframes.
@@ -114,15 +96,8 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
      * into an Object hierarchy for us.
      */
 
-    private String[] getMovieDataFromJson(String movieJsonStr, String genreSetting) throws JSONException {
+    private void getMovieDataFromJson(String movieJsonStr, String genreSetting) throws JSONException {
 
-        // Now we have a String representing the complete forecast in JSON Format.
-        // Fortunately parsing is easy:  constructor takes the JSON string and converts it
-        // into an Object hierarchy for us.
-
-        // These are the names of the JSON objects that need to be extracted.
-
-        // Movie information.  Each movie info is an element of the "results" array.
         final String OWM_LIST = "results";
         final String OWM_IDENTIFIER = "id";
         final String OWM_DATE_RELEASE = "release_date";
@@ -185,8 +160,6 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
                 //Log.d("cant Genre Movie: ", Integer.toString(inserted) );
             }
 
-
-            /**/
             Uri movieByGenreUri = GenreMovieEntry.buildMovieByGenre(genreSetting);
             Cursor cur = mContext.getContentResolver().query(movieByGenreUri, null, null, null, null);
             //Log.d("** cantidad cursor **: ", Integer.toString(cur.getCount()) );
@@ -202,19 +175,15 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             }
 
             Log.d(LOG_TAG, "FetchWeatherTask Genre movie Complete. " + cVMovieByGenreVector.size() + " Inserted");
-            /**/
-            String[] resultStrs = convertContentValuesToUXFormat(cVMovieVector);
-            return resultStrs;
 
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
         }
-        return null;
     }
 
     @Override
-    protected String[] doInBackground(String... params) {
+    protected Void doInBackground(String... params) {
 
         // If there's no zip code, there's nothing to look up.  Verify size of params.
         if (params.length == 0) {

@@ -1,6 +1,5 @@
 package net.marcoviaweb.moviescopio;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,6 +19,13 @@ import android.widget.ListView;
 import net.marcoviaweb.moviescopio.data.MovieContract;
 
 public class MovieFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+    private MovieAdapter mMovieAdapter;
+
+    private ListView mListView;
+    private int mPosition = ListView.INVALID_POSITION;
+    private boolean mUsePrincipalLayout;
+
+    private static final String SELECTED_KEY = "selected_position";
 
     private static final int MOVIE_LOADER = 0;
 
@@ -40,7 +45,9 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
     static final int COL_TITLE = 4;
     static final int COL_VOTE_AVERAGE = 5;
 
-    private ForecastAdapter mMoviesAdapter;
+    public interface Callback {
+        public void onItemSelected(Uri dateUri);
+    }
 
     public MovieFragment() {
     }
@@ -70,29 +77,35 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        mMoviesAdapter = new ForecastAdapter(getActivity(), null, 0);
+        mMovieAdapter = new MovieAdapter(getActivity(), null, 0);
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        ListView listView = (ListView) rootView.findViewById(R.id.listview_movies);
-        listView.setAdapter(mMoviesAdapter);
+        mListView = (ListView) rootView.findViewById(R.id.listview_movies);
+        mListView.setAdapter(mMovieAdapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
-
-                Log.v("Movie ID", cursor.getString(COL_MOVIE_IDENTIFIER));
                 if (cursor != null) {
-                    Intent intent = new Intent(getActivity(), DetailActivity.class)
-                            .setData(
-                                    MovieContract.MovieEntry.buildMovieId(cursor.getString(COL_MOVIE_IDENTIFIER))
-                            );
-                    startActivity(intent);
+                    String locationSetting = Utility.getPreferredGenre(getActivity());
+                    ((Callback) getActivity())
+                            .onItemSelected(MovieContract.MovieEntry.buildMovieId(
+                                    cursor.getString(COL_MOVIE_IDENTIFIER)
+                            ));
                 }
+                mPosition = position;
             }
         });
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
+            mPosition = savedInstanceState.getInt(SELECTED_KEY);
+        }
+
+        mMovieAdapter.setUsePrincipalLayout(mUsePrincipalLayout);
+
         return rootView;
     }
 
@@ -108,13 +121,24 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     private void updateMovie() {
-        FetchWeatherTask weatherTask = new FetchWeatherTask(getActivity());
+        FetchMovieTask movieTask = new FetchMovieTask(getActivity());
         String genre = Utility.getPreferredGenre(getActivity());
-        weatherTask.execute(genre);
+        movieTask.execute(genre);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if (mPosition != ListView.INVALID_POSITION) {
+            outState.putInt(SELECTED_KEY, mPosition);
+        }
+        super.onSaveInstanceState(outState);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+
+        String sortOrder = MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE + " DESC";
+
         String genreSetting = Utility.getPreferredGenre(getActivity());
         Uri movieByGenreUri = MovieContract.GenreMovieEntry.buildMovieByGenre(genreSetting);
 
@@ -123,16 +147,26 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
                 MOVIE_COLUMNS,
                 null,
                 null,
-                null);
+                sortOrder);
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        mMoviesAdapter.swapCursor(cursor);
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mMovieAdapter.swapCursor(data);
+        if (mPosition != ListView.INVALID_POSITION) {
+            mListView.smoothScrollToPosition(mPosition);
+        }
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        mMoviesAdapter.swapCursor(null);
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mMovieAdapter.swapCursor(null);
+    }
+
+    public void setUseTodayLayout(boolean usePrincipalLayout) {
+        mUsePrincipalLayout = usePrincipalLayout;
+        if (mMovieAdapter != null) {
+            mMovieAdapter.setUsePrincipalLayout(mUsePrincipalLayout);
+        }
     }
 }
