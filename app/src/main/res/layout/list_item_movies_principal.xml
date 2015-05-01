@@ -6,6 +6,7 @@
     android:gravity="center_vertical"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
+    android:background="@drawable/touch_selector"
     android:padding="16dp">
 
     <LinearLayout
@@ -16,11 +17,6 @@
         android:gravity="center_horizontal">
 
         <TextView
-            android:id="@+id/list_item_voteaverage_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <TextView
             android:id="@+id/list_item_title_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -29,6 +25,15 @@
             android:id="@+id/list_item_daterelease_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+
+        <FrameLayout
+            android:layout_width="60dp"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/list_voteaverage_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </FrameLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -42,10 +47,9 @@
             android:id="@+id/list_item_poster_imageview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
-        <TextView
-            android:id="@+id/list_item_posterPath_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true">
+        </ImageView>
+
     </LinearLayout>
 </LinearLayout>

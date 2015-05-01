@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 public class MovieAdapter extends CursorAdapter {
 
     private static final int VIEW_TYPE_COUNT = 2;
@@ -20,18 +22,16 @@ public class MovieAdapter extends CursorAdapter {
     private boolean mUsePrincipalLayout = true;
 
     public static class ViewHolder {
-        public final TextView voteAverageView;
         public final TextView titleView;
         public final TextView dateReleaseView;
         public final ImageView posterView;
-        public final TextView posterPathView;
+        public final ImageView voteAverageIconView;
 
         public ViewHolder(View view) {
-            voteAverageView = (TextView) view.findViewById(R.id.list_item_voteaverage_textview);
             titleView = (TextView) view.findViewById(R.id.list_item_title_textview);
             dateReleaseView = (TextView) view.findViewById(R.id.list_item_daterelease_textview);
             posterView = (ImageView) view.findViewById(R.id.list_item_poster_imageview);
-            posterPathView = (TextView) view.findViewById(R.id.list_item_posterPath_textview);
+            voteAverageIconView = (ImageView) view.findViewById(R.id.list_voteaverage_icon);
         }
     }
 
@@ -71,12 +71,15 @@ public class MovieAdapter extends CursorAdapter {
         int viewType = getItemViewType(cursor.getPosition());
         switch (viewType) {
             case VIEW_TYPE_MOVIE_PRINCIPAL: {
-                String posterPath = BASE_POSTER_PATH + cursor.getString(MovieFragment.COL_MOVIE_POSTER_PATH);
-                viewHolder.posterPathView.setText(posterPath);
 
-                // TODO se deberia setear la imagen principal
-                //Uri FULL_POSTER_PATH = Uri.parse(posterPath);
-                //viewHolder.posterView.setImageURI(FULL_POSTER_PATH);
+                String dateRelease = cursor.getString(MovieFragment.COL_RELEASE_DATE);
+                viewHolder.dateReleaseView.setText(dateRelease);
+
+                String posterPath = BASE_POSTER_PATH + cursor.getString(MovieFragment.COL_MOVIE_POSTER_PATH);
+                Picasso.with(context)
+                        .load(BASE_POSTER_PATH + posterPath)
+                        .into(viewHolder.posterView);
+
                 break;
             }
             case VIEW_TYPE_MOVIE_LIST: {
@@ -87,14 +90,12 @@ public class MovieAdapter extends CursorAdapter {
 
         String movieId = cursor.getString(MovieFragment.COL_MOVIE_IDENTIFIER);
 
-        String voteAverage = cursor.getString(MovieFragment.COL_VOTE_AVERAGE);
-        viewHolder.voteAverageView.setText(voteAverage);
-
         String title = cursor.getString(MovieFragment.COL_TITLE);
         viewHolder.titleView.setText(title);
 
-        String dateRelease = cursor.getString(MovieFragment.COL_RELEASE_DATE);
-        viewHolder.dateReleaseView.setText(dateRelease);
+        float voteAverage = cursor.getFloat(MovieFragment.COL_VOTE_AVERAGE);
+        viewHolder.voteAverageIconView.setImageResource(Utility.getArtResourceForAverageMovie(voteAverage));
+
     }
 
     public void setUsePrincipalLayout(boolean usePrincipalLayout) {

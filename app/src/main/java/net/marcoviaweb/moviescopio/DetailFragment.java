@@ -19,6 +19,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import net.marcoviaweb.moviescopio.data.MovieContract;
 import net.marcoviaweb.moviescopio.data.MovieContract.MovieEntry;
 
@@ -29,6 +31,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private static final String LOG_TAG = DetailFragment.class.getSimpleName();
     static final String DETAIL_URI = "URI";
+    static final String BASE_POSTER_PATH = "http://image.tmdb.org/t/p/w500";
 
     private static final String MOVIE_SHARE_HASHTAG = " #moviescopio";
 
@@ -47,12 +50,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             MovieEntry.COLUMN_VOTE_AVERAGE,
     };
 
-    private final int COL_MOVIE_ID = 0;
-    private final int COL_MOVIE_IDENTIFIER = 1;
-    private final int COL_MOVIE_POSTER_PATH = 2;
-    private final int COL_RELEASE_DATE = 3;
-    private final int COL_TITLE = 4;
-    private final int COL_VOTE_AVERAGE = 5;
+    private static final int COL_MOVIE_ID = 0;
+    private static final int COL_MOVIE_IDENTIFIER = 1;
+    private static final int COL_MOVIE_POSTER_PATH = 2;
+    private static final int COL_RELEASE_DATE = 3;
+    private static final int COL_TITLE = 4;
+    private static final int COL_VOTE_AVERAGE = 5;
 
     private TextView mvoteAverageView;
     private TextView mtitleView;
@@ -151,10 +154,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             mvoteAverageView.setText(voteAverage);
 
             String posterPath = data.getString(COL_MOVIE_POSTER_PATH);
-            mposterPathView.setText(posterPath);
+            mposterPathView.setText(BASE_POSTER_PATH + posterPath);
 
-            //TODO falta setear la imagen
-            //ImageView mposterView;
+            Picasso.with(getActivity())
+                    .load(BASE_POSTER_PATH + posterPath)
+                    .into(mposterView);
 
             mMovieStr = String.format("%s - %s - %s", releaseDate, title, voteAverage);
 
