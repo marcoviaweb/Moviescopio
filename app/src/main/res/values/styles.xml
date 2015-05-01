@@ -18,7 +18,7 @@
     <!-- main activity action bar styles -->
     <style name="ActionBar.Solid.Sunshine.NoTitle" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
         <item name="displayOptions">useLogo|showHome</item>
-        <item name="logo">@drawable/ic_launcher</item>
+        <item name="logo">@mipmap/ic_launcher</item>
     </style>
 
     <!-- Style for forecast listview -->

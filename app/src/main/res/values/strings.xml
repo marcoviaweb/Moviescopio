@@ -25,4 +25,7 @@
     <string name="pref_genre_scifi" translatable="false">878</string>
     <string name="pref_genre_thriller" translatable="false">53</string>
 
+    <string name="sync_account_type">moviescopio.marcoviaweb.net</string>
+    <string name="content_authority">net.marcoviaweb.moviescopio</string>
+
 </resources>
