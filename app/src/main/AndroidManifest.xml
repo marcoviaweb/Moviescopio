@@ -40,6 +40,9 @@
         <provider
             android:name=".data.MovieProvider"
             android:authorities="net.marcoviaweb.moviescopio" />
+        <service
+            android:name=".service.MoviescopioService" />
+        <receiver android:name=".service.MoviescopioService$AlarmReceiver" android:enabled="true"/>
     </application>
 
 </manifest>
