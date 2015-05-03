@@ -45,9 +45,6 @@
             android:authorities="@string/content_authority"
             android:syncable="true"
             android:exported="false"/>
-        <service
-            android:name=".service.MoviescopioService" />
-        <receiver android:name=".service.MoviescopioService$AlarmReceiver" android:enabled="true"/>
 
         <!-- SyncAdapter's dummy authentication service -->
         <service android:name=".sync.MoviescopioAuthenticatorService">

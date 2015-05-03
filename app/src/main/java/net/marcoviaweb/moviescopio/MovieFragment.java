@@ -1,6 +1,5 @@
 package net.marcoviaweb.moviescopio;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,7 +17,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import net.marcoviaweb.moviescopio.data.MovieContract;
-import net.marcoviaweb.moviescopio.service.MoviescopioService;
 import net.marcoviaweb.moviescopio.sync.MoviescopioSyncAdapter;
 
 public class MovieFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -69,10 +67,12 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        /*
         if (id == R.id.action_refresh) {
             updateMovie();
             return true;
         }
+        */
         return super.onOptionsItemSelected(item);
     }
 
@@ -124,14 +124,6 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     private void updateMovie() {
-        Intent alarmIntent = new Intent(getActivity(), MoviescopioService.AlarmReceiver.class);
-        /*
-        alarmIntent.putExtra(MoviescopioService.GENRE_QUERY_EXTRA, Utility.getPreferredGenre(getActivity()));
-
-        PendingIntent pi = PendingIntent.getBroadcast(getActivity(), 0,alarmIntent,PendingIntent.FLAG_ONE_SHOT);
-        AlarmManager am = (AlarmManager)getActivity().getSystemService(Context.ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 8000, pi);
-        */
         MoviescopioSyncAdapter.syncImmediately(getActivity());
     }
 

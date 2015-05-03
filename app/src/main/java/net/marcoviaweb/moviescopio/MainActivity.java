@@ -4,9 +4,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import net.marcoviaweb.moviescopio.sync.MoviescopioSyncAdapter;
 
 
 public class MainActivity extends ActionBarActivity implements MovieFragment.Callback {
@@ -19,13 +20,11 @@ public class MainActivity extends ActionBarActivity implements MovieFragment.Cal
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("*************", "Iniciooooooooooooo");
         super.onCreate(savedInstanceState);
         mGenre = Utility.getPreferredGenre(this);
 
         setContentView(R.layout.activity_main);
         if (findViewById(R.id.movie_detail_container) != null) {
-            Log.d("*************", "Ingreso aca :");
             mTwoPane = true;
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
@@ -40,6 +39,8 @@ public class MainActivity extends ActionBarActivity implements MovieFragment.Cal
         MovieFragment movieFragment =  ((MovieFragment)getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_movie_list));
         movieFragment.setUseTodayLayout(!mTwoPane);
+
+        MoviescopioSyncAdapter.initializeSyncAdapter(this);
     }
 
     @Override

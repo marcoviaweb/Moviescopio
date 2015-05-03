@@ -2,20 +2,31 @@ package net.marcoviaweb.moviescopio.sync;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.SyncRequest;
 import android.content.SyncResult;
+import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
+import net.marcoviaweb.moviescopio.MainActivity;
 import net.marcoviaweb.moviescopio.R;
 import net.marcoviaweb.moviescopio.Utility;
 import net.marcoviaweb.moviescopio.data.MovieContract;
@@ -38,6 +49,19 @@ public class MoviescopioSyncAdapter extends AbstractThreadedSyncAdapter {
     // 60 seconds (1 minute) * 180 = 3 hours
     public static final int SYNC_INTERVAL = 60 * 180;
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
+    private static final long PERIOD_IN_MILLIS = 1000 * 60 * 1;//1000 * 60 * 60 * 24;
+    private static final int MOVIE_NOTIFICATION_ID = 3007;
+
+    private static final String[] NOTIFY_MOVIE_PROJECTION = new String[] {
+            MovieContract.MovieEntry.COLUMN_IDENTIFIER,
+            MovieContract.MovieEntry.COLUMN_TITLE,
+            MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
+    };
+
+    // these indices must match the projection
+    private static final int INDEX_IDENTIFIER = 0;
+    private static final int INDEX_TITLE = 1;
+    private static final int INDEX_VOTE_AVERAGE = 2;
 
     public MoviescopioSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -188,6 +212,8 @@ public class MoviescopioSyncAdapter extends AbstractThreadedSyncAdapter {
                 ContentValues[] cvMovieByGenreArray = new ContentValues[cVMovieByGenreVector.size()];
                 cVMovieByGenreVector.toArray(cvMovieByGenreArray);
                 getContext().getContentResolver().bulkInsert(MovieContract.GenreMovieEntry.CONTENT_URI, cvMovieByGenreArray);
+
+                notifyMovie();
             }
 
             Log.d(LOG_TAG, "Moviescopio Service Complete. " + cVMovieVector.size() + " Inserted");
@@ -211,6 +237,72 @@ public class MoviescopioSyncAdapter extends AbstractThreadedSyncAdapter {
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
+        }
+    }
+
+    private void notifyMovie() {
+        Log.d(LOG_TAG, "++++++++++++Se llamo a notifyMovie ...!!!");
+        Context context = getContext();
+        //checking the last update and notify if it' the first of the day
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String displayNotificationsKey = context.getString(R.string.pref_enable_notifications_key);
+        boolean displayNotifications = prefs.getBoolean(displayNotificationsKey,
+                Boolean.parseBoolean(context.getString(R.string.pref_enable_notifications_default)));
+
+        if ( displayNotifications ) {
+            Log.d(LOG_TAG, "++++++++++++Es true...!!!");
+            String lastNotificationKey = context.getString(R.string.pref_last_notification);
+            long lastSync = prefs.getLong(lastNotificationKey, 0);
+
+            //if (System.currentTimeMillis() - lastSync >= PERIOD_IN_MILLIS) {
+                Log.d(LOG_TAG, "++++++++++++Deberia realizar la sincronización ...!!!");
+                // NotificationCompatBuilder is a very convenient way to build backward-compatible
+                // notifications.  Just throw in some data.
+                Resources resources = context.getResources();
+                int iconId = R.drawable.ic_notification;
+                Bitmap largeIcon = BitmapFactory.decodeResource(resources,
+                        R.drawable.art_notification);
+                String title = context.getString(R.string.app_name);
+                // Define the text of the forecast.
+                String contentText = String.format(context.getString(R.string.format_notification),
+                        "Moviescopio++",
+                        "9.5");
+
+            NotificationCompat.Builder mBuilder =
+                    new NotificationCompat.Builder(getContext())
+                            .setColor(resources.getColor(R.color.moviescopio_theme_light))
+                            .setSmallIcon(iconId)
+                            .setLargeIcon(largeIcon)
+                            .setContentTitle(title)
+                            .setContentText(contentText);
+
+                // Make something interesting happen when the user clicks on the notification.
+                // In this case, opening the app is sufficient.
+                Intent resultIntent = new Intent(context, MainActivity.class);
+
+                // The stack builder object will contain an artificial back stack for the
+                // started Activity.
+                // This ensures that navigating backward from the Activity leads out of
+                // your application to the Home screen.
+                TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+                stackBuilder.addNextIntent(resultIntent);
+                PendingIntent resultPendingIntent =
+                        stackBuilder.getPendingIntent(
+                                0,
+                                PendingIntent.FLAG_UPDATE_CURRENT
+                        );
+                mBuilder.setContentIntent(resultPendingIntent);
+
+                NotificationManager mNotificationManager =
+                        (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+                // WEATHER_NOTIFICATION_ID allows you to update the notification later on.
+                mNotificationManager.notify(MOVIE_NOTIFICATION_ID, mBuilder.build());
+
+                //refreshing last sync
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putLong(lastNotificationKey, System.currentTimeMillis());
+                editor.commit();
+            //}
         }
     }
 
