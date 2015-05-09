@@ -48,6 +48,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             MovieEntry.COLUMN_RELEASE_DATE,
             MovieEntry.COLUMN_TITLE,
             MovieEntry.COLUMN_VOTE_AVERAGE,
+            MovieEntry.COLUMN_BACKDROP_PATH,
+            MovieEntry.COLUMN_POPULARITY,
+            MovieEntry.COLUMN_VOTE_COUNT,
     };
 
     private static final int COL_MOVIE_ID = 0;
@@ -56,12 +59,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private static final int COL_RELEASE_DATE = 3;
     private static final int COL_TITLE = 4;
     private static final int COL_VOTE_AVERAGE = 5;
+    private static final int COL_BACKDROP_PATH = 6;
+    private static final int COL_POPULARITY = 7;
+    private static final int COL_VOTE_COUNT = 8;
 
-    private TextView mvoteAverageView;
     private TextView mtitleView;
     private TextView mdateReleaseView;
     private ImageView mposterView;
-    private TextView mposterPathView;
+    private TextView mvoteCountView;
+    private ImageView mvoteAverageIconView;
 
     public DetailFragment() {
         setHasOptionsMenu(true);
@@ -78,11 +84,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        mvoteAverageView = (TextView) rootView.findViewById(R.id.detail_voteaverage_textview);
         mtitleView = (TextView) rootView.findViewById(R.id.detail_title_textview);
         mdateReleaseView = (TextView) rootView.findViewById(R.id.detail_daterelease_textview);
         mposterView = (ImageView) rootView.findViewById(R.id.detail_poster_imageview);
-        mposterPathView = (TextView) rootView.findViewById(R.id.detail_posterPath_textview);
+        mvoteCountView = (TextView) rootView.findViewById(R.id.detail_votecount_textview);
+        mvoteAverageIconView = (ImageView) rootView.findViewById(R.id.detail_voteaverage_icon);
 
         return rootView;
     }
@@ -144,18 +150,19 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (data != null && data.moveToFirst()) {
-            String releaseDate = data.getString(COL_RELEASE_DATE);
-            mdateReleaseView.setText(releaseDate);
-
-            String title = data.getString(COL_TITLE);
+            String title = String.format(getActivity().getString(R.string.format_title), data.getString(COL_TITLE));
             mtitleView.setText(title);
 
-            String voteAverage = data.getString(COL_VOTE_AVERAGE);
-            mvoteAverageView.setText(voteAverage);
+            String releaseDate = String.format(getActivity().getString(R.string.format_release_date), data.getString(COL_RELEASE_DATE));
+            mdateReleaseView.setText(releaseDate);
+
+            String voteCount = String.format(getActivity().getString(R.string.format_vote_count), data.getString(COL_VOTE_COUNT));
+            mvoteCountView.setText(voteCount);
+
+            float voteAverage = Float.parseFloat(data.getString(COL_VOTE_AVERAGE));
+            mvoteAverageIconView.setImageResource(Utility.getArtResourceForAverageMovie(voteAverage));
 
             String posterPath = data.getString(COL_MOVIE_POSTER_PATH);
-            mposterPathView.setText(BASE_POSTER_PATH + posterPath);
-
             Picasso.with(getActivity())
                     .load(BASE_POSTER_PATH + posterPath)
                     .into(mposterView);

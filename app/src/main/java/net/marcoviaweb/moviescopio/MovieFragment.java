@@ -37,6 +37,9 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
             MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
             MovieContract.MovieEntry.COLUMN_TITLE,
             MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
+            MovieContract.MovieEntry.COLUMN_BACKDROP_PATH,
+            MovieContract.MovieEntry.COLUMN_POPULARITY,
+            MovieContract.MovieEntry.COLUMN_VOTE_COUNT,
     };
 
     static final int COL_MOVIE_ID = 0;
@@ -45,6 +48,9 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
     static final int COL_RELEASE_DATE = 3;
     static final int COL_TITLE = 4;
     static final int COL_VOTE_AVERAGE = 5;
+    static final int COL_BACKDROP_PATH = 6;
+    static final int COL_POPULARITY = 7;
+    static final int COL_VOTE_COUNT = 8;
 
     public interface Callback {
         public void onItemSelected(Uri dateUri);

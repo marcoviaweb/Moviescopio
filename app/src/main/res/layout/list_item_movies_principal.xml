@@ -5,51 +5,54 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:minHeight="?android:attr/listPreferredItemHeight"
-    android:orientation="horizontal"
-    android:background="@drawable/touch_selector"
-    android:padding="16dp">
+    android:orientation="vertical"
+    android:background="@drawable/principal_touch_selector"
+    android:padding="20dp">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/list_item_title_textview"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="center_horizontal">
+        android:textAppearance="?android:textAppearanceLarge"
+        android:textSize="50sp"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/white"/>
 
-        <TextView
-            android:id="@+id/list_item_title_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="?android:attr/listPreferredItemHeight"
+        android:orientation="horizontal"
+        android:background="@drawable/principal_touch_selector">
 
         <TextView
             android:id="@+id/list_item_daterelease_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:textAppearanceSmall"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="@color/white"/>
 
         <FrameLayout
-            android:layout_width="60dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content">
             <ImageView
                 android:id="@+id/list_voteaverage_icon"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </FrameLayout>
+
     </LinearLayout>
 
-    <LinearLayout
+    <ImageView
+        android:id="@+id/list_item_poster_imageview"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="center_horizontal">
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true">
+    </ImageView>
 
-        <ImageView
-            android:id="@+id/list_item_poster_imageview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true">
-        </ImageView>
-
-    </LinearLayout>
 </LinearLayout>

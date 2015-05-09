@@ -161,6 +161,10 @@ public class MoviescopioSyncAdapter extends AbstractThreadedSyncAdapter {
         final String OWM_TITLE = "title";
         final String OWM_VOTE_AVERAGE = "vote_average";
 
+        final String OWM_BACKDROP_PATH = "backdrop_path";
+        final String OWM_POPULARITY = "popularity";
+        final String OWM_VOTE_COUNT = "vote_count";
+
         try {
             JSONObject forecastJson = new JSONObject(movieJsonStr);
             JSONArray movieArray = forecastJson.getJSONArray(OWM_LIST);
@@ -175,6 +179,9 @@ public class MoviescopioSyncAdapter extends AbstractThreadedSyncAdapter {
                 String posterPath;
                 String title;
                 String voteAverage;
+                String backdropPath;
+                String popularity;
+                String voteCount;
 
                 // Get the JSON object representing the movie
                 JSONObject movie = movieArray.getJSONObject(i);
@@ -184,6 +191,10 @@ public class MoviescopioSyncAdapter extends AbstractThreadedSyncAdapter {
                 title = movie.getString(OWM_TITLE);
                 voteAverage = movie.getString(OWM_VOTE_AVERAGE);
 
+                backdropPath = movie.getString(OWM_BACKDROP_PATH);
+                popularity = movie.getString(OWM_POPULARITY);
+                voteCount = movie.getString(OWM_VOTE_COUNT);
+
                 //Movie content values
                 ContentValues movieValues = new ContentValues();
                 movieValues.put(MovieContract.MovieEntry.COLUMN_IDENTIFIER, identifier);
@@ -191,6 +202,9 @@ public class MoviescopioSyncAdapter extends AbstractThreadedSyncAdapter {
                 movieValues.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, releaseDate);
                 movieValues.put(MovieContract.MovieEntry.COLUMN_TITLE, title);
                 movieValues.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, voteAverage);
+                movieValues.put(MovieContract.MovieEntry.COLUMN_BACKDROP_PATH, backdropPath);
+                movieValues.put(MovieContract.MovieEntry.COLUMN_POPULARITY, popularity);
+                movieValues.put(MovieContract.MovieEntry.COLUMN_VOTE_COUNT, voteCount);
 
                 //Genre movie content values
                 ContentValues movieByGenreValues = new ContentValues();
@@ -254,54 +268,56 @@ public class MoviescopioSyncAdapter extends AbstractThreadedSyncAdapter {
             String lastNotificationKey = context.getString(R.string.pref_last_notification);
             long lastSync = prefs.getLong(lastNotificationKey, 0);
 
-            if (System.currentTimeMillis() - lastSync >= PERIOD_IN_MILLIS) {
-                Log.d(LOG_TAG, "++++++++++++Deberia realizar la sincronización ...!!!");
-                // NotificationCompatBuilder is a very convenient way to build backward-compatible
-                // notifications.  Just throw in some data.
-                Resources resources = context.getResources();
-                int iconId = R.drawable.ic_notification;
-                Bitmap largeIcon = BitmapFactory.decodeResource(resources,
-                        R.drawable.art_notification);
-                String title = context.getString(R.string.app_name);
-                // Define the text of the forecast.
-                String contentText = String.format(context.getString(R.string.format_notification),
-                        "Moviescopio++",
-                        "9.5");
+            //if (System.currentTimeMillis() - lastSync >= PERIOD_IN_MILLIS) {
+            if (true) {
+                Uri ramdonMovieUri = MovieContract.MovieEntry.buildRandomMovie();
+                Cursor cursor = context.getContentResolver().query(ramdonMovieUri, NOTIFY_MOVIE_PROJECTION, null, null, null);
 
-            NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(getContext())
-                            .setColor(resources.getColor(R.color.moviescopio_theme_light))
-                            .setSmallIcon(iconId)
-                            .setLargeIcon(largeIcon)
-                            .setContentTitle(title)
-                            .setContentText(contentText);
+                if (cursor.moveToFirst()) {
+                    Log.d(LOG_TAG, "++++++++++++Deberia notificar");
 
-                // Make something interesting happen when the user clicks on the notification.
-                // In this case, opening the app is sufficient.
-                Intent resultIntent = new Intent(context, MainActivity.class);
+                    String movieIdentifier = cursor.getString(INDEX_IDENTIFIER);
+                    String movieTitle = cursor.getString(INDEX_TITLE);
+                    String movieVoteAverage = cursor.getString(INDEX_VOTE_AVERAGE);
 
-                // The stack builder object will contain an artificial back stack for the
-                // started Activity.
-                // This ensures that navigating backward from the Activity leads out of
-                // your application to the Home screen.
-                TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-                stackBuilder.addNextIntent(resultIntent);
-                PendingIntent resultPendingIntent =
-                        stackBuilder.getPendingIntent(
-                                0,
-                                PendingIntent.FLAG_UPDATE_CURRENT
-                        );
-                mBuilder.setContentIntent(resultPendingIntent);
+                    Resources resources = context.getResources();
+                    int iconId = R.drawable.ic_notification;
+                    Bitmap largeIcon = BitmapFactory.decodeResource(resources,
+                            R.drawable.art_notification);
+                    String title = context.getString(R.string.app_name);
 
-                NotificationManager mNotificationManager =
-                        (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-                // WEATHER_NOTIFICATION_ID allows you to update the notification later on.
-                mNotificationManager.notify(MOVIE_NOTIFICATION_ID, mBuilder.build());
+                    String contentText = String.format(context.getString(R.string.format_notification),
+                            movieTitle,
+                            movieVoteAverage);
 
-                //refreshing last sync
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putLong(lastNotificationKey, System.currentTimeMillis());
-                editor.commit();
+                    NotificationCompat.Builder mBuilder =
+                            new NotificationCompat.Builder(getContext())
+                                    .setColor(resources.getColor(R.color.moviescopio_theme_light))
+                                    .setSmallIcon(iconId)
+                                    .setLargeIcon(largeIcon)
+                                    .setContentTitle(title)
+                                    .setContentText(contentText);
+
+                    Intent resultIntent = new Intent(context, MainActivity.class);
+
+                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+                    stackBuilder.addNextIntent(resultIntent);
+                    PendingIntent resultPendingIntent =
+                            stackBuilder.getPendingIntent(
+                                    0,
+                                    PendingIntent.FLAG_UPDATE_CURRENT
+                            );
+                    mBuilder.setContentIntent(resultPendingIntent);
+
+                    NotificationManager mNotificationManager =
+                            (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+
+                    mNotificationManager.notify(MOVIE_NOTIFICATION_ID, mBuilder.build());
+
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putLong(lastNotificationKey, System.currentTimeMillis());
+                    editor.commit();
+                }
             }
         }
     }

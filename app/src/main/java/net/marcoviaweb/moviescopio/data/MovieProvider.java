@@ -20,6 +20,7 @@ public class MovieProvider extends ContentProvider {
     static final int MOVIE_GENRE = 101;
     static final int MOVIE_WITH_ID = 102;
     static final int MOVIE_WITH_GENRE = 103;
+    static final int MOVIE_RANDOM = 104;
 
     private static final SQLiteQueryBuilder sWeatherByLocationSettingQueryBuilder;
 
@@ -42,8 +43,11 @@ public class MovieProvider extends ContentProvider {
             MovieContract.GenreMovieEntry.TABLE_NAME+
                     "." + MovieContract.GenreMovieEntry.COLUMN_GENRE_KEY + " LIKE ? "; //TODO LIKE
 
-    //movie.identifier = ?
     private static final String sMovieByIdSelection =
+            MovieContract.MovieEntry.TABLE_NAME+
+                    "." + MovieContract.MovieEntry.COLUMN_IDENTIFIER + " = ? ";
+
+    private static final String sMovieRandomSelection =
             MovieContract.MovieEntry.TABLE_NAME+
                     "." + MovieContract.MovieEntry.COLUMN_IDENTIFIER + " = ? ";
 
@@ -79,6 +83,19 @@ public class MovieProvider extends ContentProvider {
         );
     }
 
+    private Cursor getRandomMovie(Uri uri, String[] projection) {
+        return sWeatherByLocationSettingQueryBuilder.query(
+                mOpenHelper.getReadableDatabase(),
+                projection,
+                null,
+                null,
+                null,
+                null,
+                "RANDOM()",
+                "1"
+        );
+    }
+
     /*
         Students: Here is where you need to create the UriMatcher. This UriMatcher will
         match each URI to the WEATHER, WEATHER_WITH_LOCATION, WEATHER_WITH_LOCATION_AND_DATE,
@@ -94,6 +111,7 @@ public class MovieProvider extends ContentProvider {
         matcher.addURI(authority, MovieContract.PATH_MOVIE_GENRE, MOVIE_GENRE);
         matcher.addURI(authority, MovieContract.PATH_MOVIE + "/*", MOVIE_WITH_ID);
         matcher.addURI(authority, MovieContract.PATH_MOVIE_GENRE + "/*", MOVIE_WITH_GENRE);
+        matcher.addURI(authority, MovieContract.PATH_RANDOM, MOVIE_RANDOM);
 
         return matcher;
     }
@@ -126,6 +144,8 @@ public class MovieProvider extends ContentProvider {
                 return MovieContract.MovieEntry.CONTENT_TYPE;
             case MOVIE_WITH_GENRE:
                 return MovieContract.GenreMovieEntry.CONTENT_TYPE;
+            case MOVIE_RANDOM:
+                return MovieContract.MovieEntry.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -175,7 +195,11 @@ public class MovieProvider extends ContentProvider {
                 );
                 break;
             }
-
+            case MOVIE_RANDOM: {
+                Log.d("**** Donde ingreso **: ", "MOVIE_RANDOM");
+                retCursor = getRandomMovie(uri, projection);
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }

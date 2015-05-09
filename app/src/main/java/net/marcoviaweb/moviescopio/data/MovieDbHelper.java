@@ -12,7 +12,7 @@ import net.marcoviaweb.moviescopio.data.MovieContract.MovieEntry;
 public class MovieDbHelper extends SQLiteOpenHelper {
 
     // If you change the database schema, you must increment the database version.
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     static final String DATABASE_NAME = "movie.db";
 
@@ -30,6 +30,9 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 MovieEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_TITLE + " TEXT NOT NULL," +
                 MovieEntry.COLUMN_VOTE_AVERAGE + " REAL NOT NULL, " +
+                MovieEntry.COLUMN_BACKDROP_PATH + " TEXT NOT NULL, " +
+                MovieEntry.COLUMN_POPULARITY + " REAL NOT NULL, " +
+                MovieEntry.COLUMN_VOTE_COUNT + " REAL NOT NULL, " +
                 " UNIQUE (" + MovieEntry.COLUMN_IDENTIFIER + ") ON CONFLICT REPLACE);";
 
         // Create a table to hold genre movies.

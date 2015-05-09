@@ -11,37 +11,40 @@
         android:padding="16dp">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/detail_title_textview"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textSize="50sp"
+                android:textAppearance="?android:textAppearanceLarge"/>
 
             <TextView
                 android:id="@+id/detail_daterelease_textview"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
-        <!-- Main content: high, low, art, weather state -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:orientation="vertical">
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:textAppearanceLarge"/>
 
             <TextView
-                android:id="@+id/detail_voteaverage_textview"
+                android:id="@+id/detail_votecount_textview"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:textAppearanceLarge"/>
+
+            <ImageView
+                android:id="@+id/detail_voteaverage_icon"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
+
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:orientation="vertical">
@@ -51,13 +54,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true">
-            </ImageView>
+                android:layout_centerHorizontal="true" />
 
-            <TextView
-                android:id="@+id/detail_posterPath_textview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

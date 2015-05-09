@@ -2,6 +2,7 @@
 <resources>
 
     <color name="grey">#cccccc</color>
+    <color name="white">#FFFFFF</color>
     <color name="moviescopio_theme_light">#FFE0B2</color>
     <color name="moviescopio_theme_normal">#FF9800</color>
     <color name="moviescopio_theme_dark">#F57C00</color>

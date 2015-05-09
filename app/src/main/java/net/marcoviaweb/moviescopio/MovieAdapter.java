@@ -17,7 +17,7 @@ public class MovieAdapter extends CursorAdapter {
     private final int VIEW_TYPE_MOVIE_PRINCIPAL = 0;
     private final int VIEW_TYPE_MOVIE_LIST = 1;
 
-    private final String BASE_POSTER_PATH = "http://image.tmdb.org/t/p/w92";
+    private final String BASE_POSTER_PATH = "http://image.tmdb.org/t/p/w500";
 
     private boolean mUsePrincipalLayout = true;
 
@@ -72,10 +72,11 @@ public class MovieAdapter extends CursorAdapter {
         switch (viewType) {
             case VIEW_TYPE_MOVIE_PRINCIPAL: {
 
-                String dateRelease = cursor.getString(MovieFragment.COL_RELEASE_DATE);
+                //String dateRelease = cursor.getString(MovieFragment.COL_RELEASE_DATE);
+                String dateRelease = String.format(context.getString(R.string.format_release_date), cursor.getString(MovieFragment.COL_RELEASE_DATE));
                 viewHolder.dateReleaseView.setText(dateRelease);
 
-                String posterPath = BASE_POSTER_PATH + cursor.getString(MovieFragment.COL_MOVIE_POSTER_PATH);
+                String posterPath = BASE_POSTER_PATH + cursor.getString(MovieFragment.COL_BACKDROP_PATH);
                 Picasso.with(context)
                         .load(BASE_POSTER_PATH + posterPath)
                         .into(viewHolder.posterView);
