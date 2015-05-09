@@ -42,7 +42,7 @@
             <ImageView
                 android:id="@+id/list_voteaverage_icon"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="25dp" />
         </FrameLayout>
 
     </LinearLayout>
