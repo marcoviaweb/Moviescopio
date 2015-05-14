@@ -99,7 +99,7 @@ public class MovieFragment extends Fragment implements LoaderManager.LoaderCallb
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
                 if (cursor != null) {
-                    String locationSetting = Utility.getPreferredGenre(getActivity());
+                    String genreSetting = Utility.getPreferredGenre(getActivity());
                     ((Callback) getActivity())
                             .onItemSelected(MovieContract.MovieEntry.buildMovieId(
                                     cursor.getString(COL_MOVIE_IDENTIFIER)

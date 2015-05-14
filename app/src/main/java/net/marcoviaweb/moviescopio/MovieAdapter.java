@@ -72,7 +72,6 @@ public class MovieAdapter extends CursorAdapter {
         switch (viewType) {
             case VIEW_TYPE_MOVIE_PRINCIPAL: {
 
-                //String dateRelease = cursor.getString(MovieFragment.COL_RELEASE_DATE);
                 String dateRelease = String.format(context.getString(R.string.format_release_date), cursor.getString(MovieFragment.COL_RELEASE_DATE));
                 viewHolder.dateReleaseView.setText(dateRelease);
 
@@ -84,7 +83,6 @@ public class MovieAdapter extends CursorAdapter {
                 break;
             }
             case VIEW_TYPE_MOVIE_LIST: {
-                // Por ahora no tiene imagen principal
                 break;
             }
         }

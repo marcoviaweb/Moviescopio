@@ -10,12 +10,12 @@
     <string name="title_activity_settings">Configuraciones</string>
 
     <!-- Label for preference -->
-    <string name="pref_genre_label">Genero</string>
+    <string name="pref_genre_label">Genre</string>
 
     <string name="pref_genre_label_drama">Drama</string>
-    <string name="pref_genre_label_mystery">Misterio</string>
-    <string name="pref_genre_label_scifi">Ciencia Ficcion</string>
-    <string name="pref_genre_label_thriller">Suspenso</string>
+    <string name="pref_genre_label_mystery">Mystery</string>
+    <string name="pref_genre_label_scifi">Science Fiction</string>
+    <string name="pref_genre_label_thriller">Thriller</string>
 
     <string name="pref_genre_key" translatable="false">genre</string>
     <string name="pref_genre_default" translatable="false">878</string>

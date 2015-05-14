@@ -1,6 +1,6 @@
 <resources>
 
-    <style name="ForecastListStyle">
+    <style name="MovieListStyle">
         <item name="android:choiceMode">singleChoice</item>
     </style>
 

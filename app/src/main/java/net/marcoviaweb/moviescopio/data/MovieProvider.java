@@ -8,11 +8,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.util.Log;
 
 public class MovieProvider extends ContentProvider {
 
-    // The URI Matcher used by this content provider.
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private MovieDbHelper mOpenHelper;
 
@@ -22,14 +20,12 @@ public class MovieProvider extends ContentProvider {
     static final int MOVIE_WITH_GENRE = 103;
     static final int MOVIE_RANDOM = 104;
 
-    private static final SQLiteQueryBuilder sWeatherByLocationSettingQueryBuilder;
+    private static final SQLiteQueryBuilder sMovieByGenreSettingQueryBuilder;
 
     static{
-        sWeatherByLocationSettingQueryBuilder = new SQLiteQueryBuilder();
+        sMovieByGenreSettingQueryBuilder = new SQLiteQueryBuilder();
         
-        //This is an inner join which looks like
-        //weather INNER JOIN location ON weather.location_id = location._id
-        sWeatherByLocationSettingQueryBuilder.setTables(
+        sMovieByGenreSettingQueryBuilder.setTables(
                 MovieContract.GenreMovieEntry.TABLE_NAME + " INNER JOIN " +
                         MovieContract.MovieEntry.TABLE_NAME +
                         " ON " + MovieContract.GenreMovieEntry.TABLE_NAME +
@@ -38,10 +34,9 @@ public class MovieProvider extends ContentProvider {
                         "." + MovieContract.MovieEntry.COLUMN_IDENTIFIER);
     }
 
-    //genreMovie.genre_id = ?
     private static final String sGenreSettingSelection =
             MovieContract.GenreMovieEntry.TABLE_NAME+
-                    "." + MovieContract.GenreMovieEntry.COLUMN_GENRE_KEY + " LIKE ? "; //TODO LIKE
+                    "." + MovieContract.GenreMovieEntry.COLUMN_GENRE_KEY + " LIKE ? ";
 
     private static final String sMovieByIdSelection =
             MovieContract.MovieEntry.TABLE_NAME+
@@ -52,12 +47,12 @@ public class MovieProvider extends ContentProvider {
                     "." + MovieContract.MovieEntry.COLUMN_IDENTIFIER + " = ? ";
 
     private Cursor getMovieByGenreSetting(Uri uri, String[] projection, String sortOrder) {
-        String locationSetting = MovieContract.GenreMovieEntry.getGenreSettingFromUri(uri);
+        String genreSetting = MovieContract.GenreMovieEntry.getGenreSettingFromUri(uri);
 
-        String[] selectionArgs = new String[]{locationSetting};
+        String[] selectionArgs = new String[]{genreSetting};
         String selection = sGenreSettingSelection;
 
-        return sWeatherByLocationSettingQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+        return sMovieByGenreSettingQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                 projection,
                 selection,
                 selectionArgs,
@@ -68,12 +63,12 @@ public class MovieProvider extends ContentProvider {
     }
 
     private Cursor getMovieById(Uri uri, String[] projection, String sortOrder) {
-        String locationSetting = MovieContract.MovieEntry.getMovieIdFromUri(uri);
+        String movieById = MovieContract.MovieEntry.getMovieIdFromUri(uri);
 
-        String[] selectionArgs = new String[]{locationSetting};
+        String[] selectionArgs = new String[]{movieById};
         String selection = sMovieByIdSelection;
 
-        return sWeatherByLocationSettingQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+        return sMovieByGenreSettingQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                 projection,
                 selection,
                 selectionArgs,
@@ -84,7 +79,7 @@ public class MovieProvider extends ContentProvider {
     }
 
     private Cursor getRandomMovie(Uri uri, String[] projection) {
-        return sWeatherByLocationSettingQueryBuilder.query(
+        return sMovieByGenreSettingQueryBuilder.query(
                 mOpenHelper.getReadableDatabase(),
                 projection,
                 null,
@@ -96,17 +91,10 @@ public class MovieProvider extends ContentProvider {
         );
     }
 
-    /*
-        Students: Here is where you need to create the UriMatcher. This UriMatcher will
-        match each URI to the WEATHER, WEATHER_WITH_LOCATION, WEATHER_WITH_LOCATION_AND_DATE,
-        and LOCATION integer constants defined above.  You can test this by uncommenting the
-        testUriMatcher test within TestUriMatcher.
-     */
     static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = MovieContract.CONTENT_AUTHORITY;
 
-        // For each type of URI you want to add, create a corresponding code.
         matcher.addURI(authority, MovieContract.PATH_MOVIE, MOVIE);
         matcher.addURI(authority, MovieContract.PATH_MOVIE_GENRE, MOVIE_GENRE);
         matcher.addURI(authority, MovieContract.PATH_MOVIE + "/*", MOVIE_WITH_ID);
@@ -116,21 +104,12 @@ public class MovieProvider extends ContentProvider {
         return matcher;
     }
 
-    /*
-        Students: We've coded this for you.  We just create a new WeatherDbHelper for later use
-        here.
-     */
     @Override
     public boolean onCreate() {
         mOpenHelper = new MovieDbHelper(getContext());
         return true;
     }
 
-    /*
-        Students: Here's where you'll code the getType function that uses the UriMatcher.  You can
-        test this by uncommenting testGetType in TestProvider.
-
-     */
     @Override
     public String getType(Uri uri) {
         final int match = sUriMatcher.match(uri);
@@ -154,23 +133,18 @@ public class MovieProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
-        // Here's the switch statement that, given a URI, will determine what kind of request it is,
-        // and query the database accordingly.
+
         Cursor retCursor;
         switch (sUriMatcher.match(uri)) {
             case MOVIE_WITH_ID: {
-                Log.d("**** Donde ingreso **: ", "MOVIE_WITH_ID");
                 retCursor = getMovieById(uri, projection, sortOrder);
                 break;
             }
             case MOVIE_WITH_GENRE: {
-                //Log.d("** Donde ingreso **: ", "MOVIE_WITH_GENRE" );
                 retCursor = getMovieByGenreSetting(uri, projection, sortOrder);
                 break;
             }
-            case MOVIE:
-            {
-                //Log.d("** Donde ingreso **: ", "MOVIE" );
+            case MOVIE: {
                 retCursor = mOpenHelper.getReadableDatabase().query(
                         MovieContract.MovieEntry.TABLE_NAME,
                         projection,
@@ -183,7 +157,6 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             case MOVIE_GENRE: {
-                //Log.d("** Donde ingreso **: ", "MOVIE_GENRE" );
                 retCursor = mOpenHelper.getReadableDatabase().query(
                         MovieContract.GenreMovieEntry.TABLE_NAME,
                         projection,
@@ -196,7 +169,6 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             case MOVIE_RANDOM: {
-                Log.d("**** Donde ingreso **: ", "MOVIE_RANDOM");
                 retCursor = getRandomMovie(uri, projection);
                 break;
             }
@@ -207,9 +179,6 @@ public class MovieProvider extends ContentProvider {
         return retCursor;
     }
 
-    /*
-        Student: Add the ability to insert Locations to the implementation of this function.
-     */
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -245,8 +214,10 @@ public class MovieProvider extends ContentProvider {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         int rowsDeleted;
-        // this makes delete all rows return the number of rows deleted
-        if ( null == selection ) selection = "1";
+
+        if ( null == selection )
+            selection = "1";
+
         switch (match) {
             case MOVIE_GENRE:
                 rowsDeleted = db.delete(
@@ -259,7 +230,7 @@ public class MovieProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-        // Because a null deletes all rows
+
         if (rowsDeleted != 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }
@@ -335,9 +306,6 @@ public class MovieProvider extends ContentProvider {
         }
     }
 
-    // You do not need to call this method. This is a method specifically to assist the testing
-    // framework in running smoothly. You can read more at:
-    // http://developer.android.com/reference/android/content/ContentProvider.html#shutdown()
     @Override
     @TargetApi(11)
     public void shutdown() {

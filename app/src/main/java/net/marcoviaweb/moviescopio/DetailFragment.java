@@ -24,9 +24,6 @@ import com.squareup.picasso.Picasso;
 import net.marcoviaweb.moviescopio.data.MovieContract;
 import net.marcoviaweb.moviescopio.data.MovieContract.MovieEntry;
 
-/**
- * A placeholder fragment containing a simple view.
- */
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String LOG_TAG = DetailFragment.class.getSimpleName();
@@ -133,8 +130,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if ( null != mUri ) {
-            // Now create and return a CursorLoader that will take care of
-            // creating a Cursor for the data being displayed.
             return new CursorLoader(
                     getActivity(),
                     mUri,
@@ -169,7 +164,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             mMovieStr = String.format("%s - %s - %s", releaseDate, title, voteAverage);
 
-            // If onCreateOptionsMenu has already happened, we need to update the share intent now.
             if (mShareActionProvider != null) {
                 mShareActionProvider.setShareIntent(createShareMovieIntent());
             }
