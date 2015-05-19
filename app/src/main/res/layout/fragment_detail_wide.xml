@@ -20,7 +20,7 @@
                 android:id="@+id/detail_title_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="50sp"
+                android:textSize="30sp"
                 android:textAppearance="?android:textAppearanceLarge"/>
 
             <TextView
@@ -38,7 +38,7 @@
             <ImageView
                 android:id="@+id/detail_voteaverage_icon"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="30dp" />
 
         </LinearLayout>
 

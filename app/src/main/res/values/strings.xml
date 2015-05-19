@@ -6,7 +6,7 @@
     <string name="action_refresh" translatable="false">Refrescar</string>
     <string name="action_share" translatable="false">Compartir</string>
 
-    <string name="title_activity_detail">Detalle</string>
+    <string name="title_activity_detail">Details</string>
     <string name="title_activity_settings">Configuraciones</string>
 
     <!-- Label for preference -->
