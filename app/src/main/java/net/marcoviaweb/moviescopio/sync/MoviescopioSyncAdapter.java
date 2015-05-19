@@ -49,7 +49,7 @@ public class MoviescopioSyncAdapter extends AbstractThreadedSyncAdapter {
     // 60 seconds (1 minute) * 180 = 3 hours
     public static final int SYNC_INTERVAL = 60 * 180;
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
-    private static final long PERIOD_IN_MILLIS = 1000 * 60 * 60 * 24 * 2;
+    private static final long PERIOD_IN_MILLIS = 1000 * 60 * 60 * 24 * 1;
     private static final int MOVIE_NOTIFICATION_ID = 3007;
 
     private static final String[] NOTIFY_MOVIE_PROJECTION = new String[] {
@@ -233,7 +233,9 @@ public class MoviescopioSyncAdapter extends AbstractThreadedSyncAdapter {
             String lastNotificationKey = context.getString(R.string.pref_last_notification);
             long lastSync = prefs.getLong(lastNotificationKey, 0);
 
+            //if (true) {
             if (System.currentTimeMillis() - lastSync >= PERIOD_IN_MILLIS) {
+                Log.v("+++++++++++", "notificar pero ya !!!");
 
                 Uri ramdonMovieUri = MovieContract.MovieEntry.buildRandomMovie();
                 Cursor cursor = context.getContentResolver().query(ramdonMovieUri, NOTIFY_MOVIE_PROJECTION, null, null, null);
